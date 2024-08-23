@@ -1,3 +1,6 @@
+# Ignore the HTTP file
+requests.http
+
 # Django #
 *.log
 *.pot
