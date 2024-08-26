@@ -1,5 +1,5 @@
 from ninja import NinjaAPI
-from .models import InputActivity
+from monitor.models import InputActivity
 from .schemas import InputActivitySchema, InputActivityCreateSchema
 from django.shortcuts import get_object_or_404
 

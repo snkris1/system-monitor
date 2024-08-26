@@ -1,5 +1,5 @@
 from ninja import ModelSchema, Schema
-from .models import InputActivity
+from monitor.models import InputActivity
 
 class InputActivitySchema(ModelSchema):
     class Config:

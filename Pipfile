@@ -8,6 +8,9 @@ django = "*"
 django-ninja = "*"
 django-extensions = "*"
 python-decouple = "*"
+matplotlib = "*"
+pynput = "*"
+requests = "*"
 
 [dev-packages]
 
