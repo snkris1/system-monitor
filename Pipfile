@@ -11,6 +11,8 @@ python-decouple = "*"
 matplotlib = "*"
 pynput = "*"
 requests = "*"
+djangorestframework = "*"
+djangorestframework-simplejwt = "*"
 
 [dev-packages]
 
