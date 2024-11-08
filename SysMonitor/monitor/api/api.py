@@ -1,21 +1,30 @@
-from ninja import NinjaAPI
-from monitor.models import InputActivity
-from .schemas import InputActivitySchema, InputActivityCreateSchema
+from ninja import Router
+from monitor.models import InputActivity, CPU, Device
+from .schemas import CPUSchema, CPUCreateSchema, DeviceSchema
 from django.shortcuts import get_object_or_404
+from datetime import datetime 
 
-api = NinjaAPI()
+api = Router()
 
-@api.get("/input_activity", response=list[InputActivitySchema])
-def get_input_activities(request):
-    return InputActivity.objects.all()
+@api.get("{device}/cpu", response=list[CPUSchema])
+def get_cpu_data(request, device_name: str):
+    device_model = get_object_or_404(Device, name=device_name)
+    return CPU.objects.filter(device=device_model)
 
-@api.get("/input_activity/{timestamp}", response=InputActivitySchema)
-def get_input_activity(request, timestamp: str):
-    activity = get_object_or_404(InputActivity, timestamp=timestamp)
-    return activity
+@api.get("{device}/cpu/{timestamp}")
+def get_cpu_data_at_timestamp(request, device_name: str, timestamp: datetime):
+    device_model = get_object_or_404(Device, name=device_name)
+    return CPU.objects.filter(device=device_model, timestamp=timestamp)
 
-@api.post("/input_activity", response=InputActivitySchema)
-def create_input_activity(request, input_activity: InputActivityCreateSchema):
-    input_activity_data = input_activity.dict()
-    input_activity_model = InputActivity.objects.create(**input_activity_data)
-    return input_activity_model
+@api.post("{device}/cpu", response=CPUSchema)
+def create_cpu_data(request, cpu: CPUCreateSchema, device_name: str):
+    device_model = get_object_or_404(Device, name=device_name)
+    cpu_data = cpu.dict()
+    cpu_model = CPU.objects.create(device=device_model, **cpu_data)
+    return cpu_model
+
+api.post("/device", response=DeviceSchema)
+def create_device(request, device: DeviceSchema):
+    device_data = device.dict()
+    device_model = Device.objects.create(**device_data)
+    return device_model
