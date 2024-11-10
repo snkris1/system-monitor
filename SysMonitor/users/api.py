@@ -1,9 +1,10 @@
 from django.contrib.auth import get_user_model, authenticate
 from ninja import Router
 from django.contrib.auth.hashers import make_password
-from schemas import LoginSchema, RegisterSchema, TokenSchema, RefreshSchema
+from .schemas import LoginSchema, RegisterSchema, TokenSchema, RefreshSchema
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
+from ninja.errors import HttpError
 
 auth_router = Router()
 User = get_user_model()
@@ -25,16 +26,16 @@ def refresh_token(request, data: RefreshSchema):
         }
         return new_tokens
     except TokenError:
-        raise TokenError("Invalid or expired token")
+        raise TokenError("Invalid or expired token") # can create custom exception handler that does this so its centralized or middleware
 
-@auth_router.post("/login", response=TokenSchema)
+@auth_router.post("/login", response=TokenSchema) 
 def login(request, data: LoginSchema):
     user = authenticate(request, username=data.email, password=data.password)
     if user is not None:
         tokens = get_tokens_for_user(user)
         return tokens
     else:
-        return {"error": "Invalid email or password"}, 401
+        raise HttpError(401, "Invalid email or password")
 
 @auth_router.post("/register", response=TokenSchema)
 def register(request, data: RegisterSchema):

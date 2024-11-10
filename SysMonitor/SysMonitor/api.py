@@ -1,6 +1,6 @@
 from ninja import NinjaAPI
-from monitor.api import router as monitor_router
-from users.api import router as auth_router
+from monitor.api.api import monitor_router
+from users.api import auth_router
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 

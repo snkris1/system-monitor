@@ -1,6 +1,7 @@
 from django.db import models
+from django.contrib.auth import get_user_model
 
-# TO DO: ADD USER MODEL AS FOREGIN KEY IN DEVICE 
+User = get_user_model()
 
 class TimestampedModel(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True, verbose_name="Timestamp", help_text="Time of the record")
@@ -10,7 +11,8 @@ class TimestampedModel(models.Model):
 
 class Device(models.Model):
     name = models.CharField(max_length=255, verbose_name="Device Name", help_text="Name of the device")
-
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="User", related_name="devices")
+    
     def __str__(self):
         return self.name
     
