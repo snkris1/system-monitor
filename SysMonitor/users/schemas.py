@@ -1,12 +1,18 @@
 from ninja import ModelSchema, Schema
 from pydantic import EmailStr
 
-class LoginSchema(ModelSchema):
+class LoginSchema(Schema):
     email: EmailStr
     password: str
 
+class TokenSchema(Schema):
+    access: str
+    refresh: str
 
-class RegisterSchema(ModelSchema):
+class RefreshSchema(Schema):
+    refresh: str
+
+class RegisterSchema(Schema):
     email: EmailStr
     password: str
 

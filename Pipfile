@@ -11,6 +11,9 @@ python-decouple = "*"
 matplotlib = "*"
 pynput = "*"
 requests = "*"
+djangorestframework = "*"
+djangorestframework-simplejwt = "*"
+pydantic = {extras = ["email"], version = "*"}
 
 [dev-packages]
 
