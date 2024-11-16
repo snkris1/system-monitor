@@ -29,19 +29,19 @@ class CPUCreateSchema(Schema):
 class MemorySchema(ModelSchema):
     class Meta:
         model = Memory
-        fields = ['device', 'total_memory', 'available_memory', 'used_memory', 'memory_percent']
+        fields = ['total_memory', 'available_memory', 'used_memory', 'memory_percent']
 
 class MemoryCreateSchema(Schema):
     class Meta:
         model = Memory
-        fields = ['device', 'total_memory', 'available_memory', 'used_memory', 'memory_percent']
+        fields = ['total_memory', 'available_memory', 'used_memory', 'memory_percent']
 
 class NetworkSchema(ModelSchema):
     class Meta:
         model = Network
-        fields = ['device', 'is_up', 'speed', 'mtu']
+        fields = ['is_up', 'speed', 'mtu']
 
 class NetworkCreateSchema(ModelSchema):
     class Meta:
         model = Network
-        fields = ['device', 'is_up', 'speed', 'mtu']
+        fields = ['is_up', 'speed', 'mtu']
