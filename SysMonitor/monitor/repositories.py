@@ -1,6 +1,7 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from .models import Device, CPU, Memory, Network
+from django.core import serializers
 
 class RepositoryError(Exception):
     """Base class for all repository errors."""
@@ -22,6 +23,26 @@ class DeviceRepository:
             return Device.objects.get(name=name, user=user)
         except Device.DoesNotExist:
             raise ObjectDoesNotExist
+        
+    def get_metrics(self, user, device: Device):
+        try:
+            cpu_data = device.cpu_set.all()
+            memory_data = device.memory_set.all()
+            network_data = device.network_set.all()
+
+            cpu_data_json = serializers.serialize('json', cpu_data)
+            memory_data_json = serializers.serialize('json', memory_data)
+            network_data_json = serializers.serialize('json', network_data)
+
+            metrics = {
+                "cpu_data": cpu_data_json,
+                "memory_data": memory_data_json,
+                "network_data": network_data_json
+            }
+
+            return metrics
+        except Exception as e:
+            raise RepositoryError(f"Failed to retrieve metrics: {e}") from e
 
 class CPURepository:
     def get_cpu_data(self, device):

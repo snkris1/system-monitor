@@ -8,7 +8,6 @@ from .repositories import (
 
 logger = logging.getLogger("system_monitor")
 
-# TODO: DEPENDENCY INJECTION 
 class ServiceError(Exception):
     """Base class for all service errors."""
     pass
@@ -28,6 +27,19 @@ class DeviceService:
             raise ValueError("Device already exists or constraint violation")
         except RepositoryError as e:
             logger.error(f"RepositoryError while creating device for user {user.id}: {e}")
+            raise ServiceError("Internal server error")
+        
+    def get_metrics(self, user, device_name):
+        try:
+            device = self.device_repo.get_device_by_name(device_name, user)
+            metrics = self.device_repo.get_metrics(user, device)
+
+            return metrics
+        except ObjectDoesNotExist as e:
+            logger.error(f"ObjectDoesNotExist while fetching device {device_name} for user {user.id}: {e}")
+            raise ValueError("Device not found.")
+        except RepositoryError as e:
+            logger.error(f"RepositoryError while fetching metrics for device {device_name} and user {user.id}: {e}")
             raise ServiceError("Internal server error")
 
 class CPUService:

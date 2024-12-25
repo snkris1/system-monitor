@@ -32,16 +32,19 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'users',
     'monitor',
     'django_extensions',
     'rest_framework_simplejwt.token_blacklist',
+    'channels',
 ]
 
 REST_FRAMEWORK = {
@@ -112,8 +115,23 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'SysMonitor.wsgi.application'
+# WSGI_APPLICATION = 'SysMonitor.wsgi.application'
+ASGI_APPLICATION = 'SysMonitor.asgi.application'
 
+ALLOWED_HOSTS = ['yourserver.com', 'www.yourserver.com', '127.0.0.1', 'localhost']
+
+CORS_ALLOWED_ORIGINS = [
+    "https://www.example.com",  # Allow specific origins
+    "http://localhost:8080",    # Allow from your development server
+    "http://wsl.localhost",    # Allow from WSL
+]
+
+# Channel layer config
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases

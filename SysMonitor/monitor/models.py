@@ -33,7 +33,7 @@ class CPU(TimestampedModel):
     class Meta:
         verbose_name = "CPU"
         verbose_name_plural = "CPUs"
-        ordering = ['-timestamp']
+        ordering = ['timestamp']
     
 class Memory(TimestampedModel):
     device = models.ForeignKey(Device, on_delete=models.CASCADE, verbose_name="CPU Device", related_name="memory")

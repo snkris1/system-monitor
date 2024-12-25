@@ -13,7 +13,6 @@ class CPUSchema(ModelSchema):
         fields = ['device', 'total_usage_percent', 'per_cpu_percent', 'cpu_freq', 'cpu_temperature']
 
 class CPUCreateSchema(Schema):
-    device: str
     total_usage_percent: float
     per_cpu_percent: dict
     cpu_freq: dict
