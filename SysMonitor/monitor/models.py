@@ -21,7 +21,7 @@ class Device(models.Model):
         verbose_name_plural = "Devices"
 
 class CPU(TimestampedModel):
-    device = models.ForeignKey(Device, on_delete=models.CASCADE, verbose_name="CPU Device", related_name="cpu")
+    device = models.ForeignKey(Device, on_delete=models.CASCADE, verbose_name="CPU Device", related_name="cpu_data")
     total_usage_percent = models.FloatField(verbose_name="Total CPU Utilization")
     per_cpu_percent = models.JSONField(verbose_name="CPU Utilization per Core")
     cpu_freq = models.JSONField(verbose_name="CPU Frequency")
@@ -36,7 +36,7 @@ class CPU(TimestampedModel):
         ordering = ['timestamp']
     
 class Memory(TimestampedModel):
-    device = models.ForeignKey(Device, on_delete=models.CASCADE, verbose_name="CPU Device", related_name="memory")
+    device = models.ForeignKey(Device, on_delete=models.CASCADE, verbose_name="CPU Device", related_name="memory_data")
     total_memory = models.IntegerField(verbose_name="Total Memory")
     available_memory = models.IntegerField(verbose_name="Available Memory")
     used_memory = models.IntegerField(verbose_name="Used Memory")
@@ -51,7 +51,7 @@ class Memory(TimestampedModel):
         ordering = ['-timestamp']
 
 class Network(TimestampedModel):
-    device = models.ForeignKey(Device, on_delete=models.CASCADE, verbose_name="CPU Device", related_name="network")
+    device = models.ForeignKey(Device, on_delete=models.CASCADE, verbose_name="CPU Device", related_name="network_data")
     is_up = models.BooleanField(verbose_name="Is Up", help_text="Network status")
     speed = models.IntegerField(verbose_name="Speed")
     mtu = models.IntegerField(verbose_name="MTU")

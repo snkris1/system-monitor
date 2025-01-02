@@ -2,6 +2,11 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from .models import Device, CPU, Memory, Network
 from django.core import serializers
+import logging
+
+#TODO: MISSING ERROR HANDLING FOR EXCEPTIONS FOR SOME FUNCTIONS
+
+logger = logging.getLogger("system_monitor")
 
 class RepositoryError(Exception):
     """Base class for all repository errors."""
@@ -20,15 +25,20 @@ class DeviceRepository:
 
     def get_device_by_name(self, name, user):
         try:
+            logger.debug(f"device repository 'get_device_by_name' called for USER: {user}, DEVICE: {name}")
             return Device.objects.get(name=name, user=user)
         except Device.DoesNotExist:
             raise ObjectDoesNotExist
+        except Exception as e:
+            raise RepositoryError(f"Failed to get device: {e}") from e
         
     def get_metrics(self, user, device: Device):
         try:
-            cpu_data = device.cpu_set.all()
-            memory_data = device.memory_set.all()
-            network_data = device.network_set.all()
+            logger.debug(f"device repository initiated for data metrics retrieval for USER: {user}, DEVICE: {device}")
+
+            cpu_data = device.cpu_data.all()
+            memory_data = device.memory_data.all()
+            network_data = device.network_data.all()
 
             cpu_data_json = serializers.serialize('json', cpu_data)
             memory_data_json = serializers.serialize('json', memory_data)

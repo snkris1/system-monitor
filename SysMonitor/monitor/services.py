@@ -31,8 +31,12 @@ class DeviceService:
         
     def get_metrics(self, user, device_name):
         try:
+            logger.debug(f"device service initiated for data metrics retrieval for USER: {user}, DEVICE: {device_name}")
+
             device = self.device_repo.get_device_by_name(device_name, user)
             metrics = self.device_repo.get_metrics(user, device)
+
+            logger.debug("data service: metrics retrieved.")
 
             return metrics
         except ObjectDoesNotExist as e:
