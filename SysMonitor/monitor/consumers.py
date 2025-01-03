@@ -68,8 +68,8 @@ class DashboardConsumer(AsyncWebsocketConsumer):
                 else:
                     logger.debug(f"User '{self.user}' subscribed to device '{device_name}'.")
 
-                    result = get_metrics_task.delay(self.user_id, device_name)
-                    task_id = result.id
+                    task = get_metrics_task.delay(self.user_id, device_name)
+                    task_id = task.id
                     self.subscriptions[device_name] = task_id
 
                     message = f"Successfully subscribed to device '{device_name}"
@@ -96,13 +96,24 @@ class DashboardConsumer(AsyncWebsocketConsumer):
                     logger.debug(f"User '{self.user}' unsubscribed to device '{device_name}'.")
 
                     task_id = self.subscriptions[device_name]
-                    AsyncResult(task_id).revoke(terminate=True)
+                    task = AsyncResult(task_id)
+                    task.abort()
+
+                    logger.debug("Waiting for get_metrics task to complete")
+                    task.get(timeout=10)
 
                     message = f"Successfully unsubscribed to device '{device_name}'."
                     await self.send(text_data=json.dumps({
                         "type": "success",
                         "message": message
                     }))
+            except TimeoutError: #TODO: BETTER ERROR HANDLING HERE. WHAT TO DO WHEN TIME OUT ERROR OCCURS
+                logger.error(f"get_metrics task did not complete within 5 seconds.")
+                message = f"Error while unsubscribing to device '{device_name}' for user '{self.user}'."
+                await self.send(text_data=json.dumps({
+                    "type": "error",
+                    "message": message
+                }))
             except Exception as e:
                 logger.error(f"Error while unsubscribing to device '{device_name}' for user '{self.user}': {e}")
     

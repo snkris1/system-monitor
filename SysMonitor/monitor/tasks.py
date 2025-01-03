@@ -1,4 +1,5 @@
 from celery import shared_task
+from celery.contrib.abortable import AbortableTask
 from monitor.repositories import DeviceRepository
 from monitor.services import DeviceService
 from users.services import get_user_by_id
@@ -9,7 +10,7 @@ import time
 
 logger = logging.getLogger("system_monitor")
 
-@shared_task(bind=True)
+@shared_task(bind=True, base=AbortableTask)
 def get_metrics_task(self, user_id, device_name):
     try:
         logger.debug(f"get_metrics task created for user '{user}' and device '{device_name}'")
@@ -22,6 +23,9 @@ def get_metrics_task(self, user_id, device_name):
         
         while True:
             try:
+                if self.is_aborted():
+                    logger.warning(f"get_metrics task aborted for user '{user}' and device '{device_name}'")
+                    return
                 
                 message = device_service.get_metrics(self.user, device_name)
 
