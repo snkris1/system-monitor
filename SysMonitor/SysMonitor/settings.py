@@ -32,15 +32,19 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'users',
     'monitor',
     'django_extensions',
+    'rest_framework_simplejwt.token_blacklist',
+    'channels',
 ]
 
 REST_FRAMEWORK = {
@@ -111,8 +115,23 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'SysMonitor.wsgi.application'
+# WSGI_APPLICATION = 'SysMonitor.wsgi.application'
+ASGI_APPLICATION = 'SysMonitor.asgi.application'
 
+ALLOWED_HOSTS = ['yourserver.com', 'www.yourserver.com', '127.0.0.1', 'localhost']
+
+CORS_ALLOWED_ORIGINS = [
+    "https://www.example.com",  # Allow specific origins
+    "http://localhost:8080",    # Allow from your development server
+    "http://wsl.localhost",    # Allow from WSL
+]
+
+# Channel layer config
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -169,3 +188,66 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Authentication
 
 AUTH_USER_MODEL = 'users.User'
+
+# Logging
+import os
+
+LOG_DIR = os.path.join(BASE_DIR, "logs")
+if not os.path.exists(LOG_DIR):
+    os.makedirs(LOG_DIR)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
+    },
+    "filters": {
+        "require_debug_true": {
+            "()": "django.utils.log.RequireDebugTrue",
+        },
+    },
+    "handlers": {
+        "console": {
+            "level": "DEBUG",
+            "filters": ["require_debug_true"],
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+        "file": {
+            "level": "DEBUG",
+            "filters": ["require_debug_true"],
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(LOG_DIR, "system_monitor.log"),
+            "maxBytes": 1024 * 1024,
+            "backupCount": 5,
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["file"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+        "system_monitor": {
+            "handlers": ["console", "file"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+    },
+}
+
+# Celery settings
+CELERY_BROKER_URL = 'pyamqp://guest@localhost//'  
+CELERY_RESULT_BACKEND = 'rpc://'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'

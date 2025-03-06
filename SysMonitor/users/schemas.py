@@ -16,3 +16,6 @@ class RegisterSchema(Schema):
     email: EmailStr
     password: str
 
+class LogoutSchema(Schema):
+    refresh_token: str
+
