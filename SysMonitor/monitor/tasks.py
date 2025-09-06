@@ -12,38 +12,50 @@ logger = logging.getLogger("system_monitor")
 
 @shared_task(bind=True, base=AbortableTask)
 def get_metrics_task(self, user_id, device_name):
+    """
+    A long-running Celery task to periodically fetch system metrics for a device
+    and send them to the client via WebSockets.
+    """
+    logger.info(f"Starting metrics task for user_id '{user_id}' and device '{device_name}'")
+    channel_layer = get_channel_layer()
+    # Group name is used by Django Channels to broadcast messages to all consumers
+    # that have subscribed to this group.
+    group_name = f"device_{device_name.replace(' ', '_')}"
+
     try:
-        logger.debug(f"get_metrics task created for user '{user}' and device '{device_name}'")
-
-        self.channel_layer = get_channel_layer()
-
         device_repo_in = DeviceRepository()
         device_service = DeviceService(device_repo_in)
         user = get_user_by_id(user_id)
-        
-        while True:
+
+        if not user:
+            logger.error(f"No user found with id {user_id}. Aborting task.")
+            return
+
+        while not self.is_aborted():
             try:
-                if self.is_aborted():
-                    logger.warning(f"get_metrics task aborted for user '{user}' and device '{device_name}'")
-                    return
-                
-                message = device_service.get_metrics(self.user, device_name)
+                message = device_service.get_metrics(user, device_name)
 
                 if not message:
-                    logger.debug("get_metrics task failed. No metrics data retrieved.")
+                    logger.warning(f"No metrics data retrieved for device '{device_name}'.")
                 else:
-                    logger.debug(f"get_metrics task completed. Metrics data retrieved.")
-
-                async_to_sync(self.channel_layer.group_send)(
-                    self.group_name, {
-                        "type": "send.metrics",
-                        "message": message
-                    }
-                )
+                    logger.debug(f"Metrics retrieved for device '{device_name}'. Sending to group '{group_name}'.")
+                    async_to_sync(channel_layer.group_send)(
+                        group_name, {
+                            "type": "send.metrics",
+                            "message": message
+                        }
+                    )
                 
                 time.sleep(5)
-            except:
-                pass
+
+            except Exception as e:
+                # Log errors inside the loop to ensure the task continues running
+                logger.error(f"Error in get_metrics loop for device '{device_name}': {e}", exc_info=True)
+                # Wait before retrying to avoid spamming logs in case of a persistent error
+                time.sleep(10)
+
+        logger.info(f"Metrics task for device '{device_name}' was aborted.")
+
     except Exception as e:
-        print(f"An error occurred during get_metrics task: {e}")
-        # Revoke task
+        # Log any setup errors that occur before the loop starts
+        logger.critical(f"Fatal error in get_metrics_task setup for device '{device_name}': {e}", exc_info=True)
